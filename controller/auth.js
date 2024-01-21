@@ -3,6 +3,7 @@ const User = require("../models/auth");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const shortid = require("shortid");
+
 const signUp = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   if (!firstName || !lastName || !email || !password) {
@@ -35,6 +36,7 @@ const signUp = async (req, res) => {
      });
     }
 };
+
 const signIn = async (req, res) => {
   try {
      if (!req.body.email || !req.body.password) {
@@ -69,4 +71,10 @@ const signIn = async (req, res) => {
    res.status(StatusCodes.BAD_REQUEST).json({ error });
   }
 };
-module.exports = { signUp, signIn};
+
+const userProfile = () => async (req, res) => {
+   res.json(posts.filter(u => u._id === req.user._id))
+}
+
+
+module.exports = { signUp, signIn, userProfile};

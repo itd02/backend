@@ -16,6 +16,7 @@ check("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 character long"),
 ]
+
 const isRequestValidated = (req, res, next) => {
   const errors = validationResult(req);
  
@@ -26,8 +27,23 @@ const isRequestValidated = (req, res, next) => {
   }
   next();
 };
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if (token == null) return res.sendStatus(401)
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    console.log(err)
+    if (err) return res.sendStatus(403)
+    req.user = user
+    next()
+  })
+} 
+
 module.exports = {
   validateSignUpRequest,
   isRequestValidated,
   validateSignIpRequest,
+  authenticateToken
 };

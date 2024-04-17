@@ -1,18 +1,18 @@
-const { check, validationResult } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 const { StatusCodes } = require("http-status-codes");
-
+const jwt = require("jsonwebtoken");
 
 const validateSignUpRequest = [
-check("firstName").notEmpty().withMessage("First Name is required"),
-check("lastName").notEmpty().withMessage("Last Name is required"),
-check("email").isEmail().withMessage("Valid Email required"),
-check("password")
+body("firstName").notEmpty().withMessage("First Name is required"),
+body("lastName").notEmpty().withMessage("Last Name is required"),
+body("email").isEmail().withMessage("Valid Email required"),
+body("password")
    .isLength({ min: 6 })
    .withMessage("Password must be at least 6 character long"),
 ];
 const validateSignIpRequest = [
-check("email").isEmail().withMessage("Valid Email required"),
-check("password")
+body("email").isEmail().withMessage("Valid Email required"),
+body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 character long"),
 ]
@@ -27,19 +27,27 @@ const isRequestValidated = (req, res, next) => {
   }
   next();
 };
-
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
-  if (token == null) return res.sendStatus(401)
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401); // Unauthorized
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    console.log(err)
-    if (err) return res.sendStatus(403)
-    req.user = user
-    next()
-  })
-} 
+    if (err) {
+      console.error("JWT verification error:", err);
+      return res.sendStatus(403); // Forbidden
+    }
+    console.log(user)
+
+    req.user = user; // Attach user information to request object
+    next(); // Proceed to the next middleware
+  });
+};
+
+
 
 module.exports = {
   validateSignUpRequest,

@@ -12,7 +12,7 @@ const authRouter = require("./routes/auth");
 app.use("/api", authRouter);
 
 //Port and Connect to DB
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5003;
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URL);
